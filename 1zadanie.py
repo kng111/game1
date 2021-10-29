@@ -1,143 +1,99 @@
-
-
-import random
+"""
+Platformer Game
+"""
 import arcade
-import time
-from arcade import key
-import speech_recognition as sr
-mic = sr.Microphone(device_index=1)
-
+from pathlib import Path
+import random
+# Constants
 SPRITE_SCALING = 0.5
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 700
+SCREEN_WIDTH = 510
+SCREEN_HEIGHT = 550
 SCREEN_TITLE = "game"
 
 MOVEMENT_SPEED = 5
-x = ['ladybug.png','frog.png','mouse.png','fly.png' ,'slimeBlue.png']
+
+TILE_SCALING = 0.5
+GRAVITY = 1.0
+CHARACTER_SCALING = 0.5
+
+x = ['1_vagoni.jpg','2_vagoni.jpg','3_vagoni.jpg']
 x2 = (random.choice(x))
-
-class Player(arcade.Sprite):
-
-
-    def update(self):
-
-        self.center_x += self.change_x
-        self.center_y += self.change_y
-
-        # Check for out-of-bounds
-        if self.left < 0:
-            self.left = 0
-        elif self.right > SCREEN_WIDTH - 1:
-            self.right = SCREEN_WIDTH - 1
-
-        if self.bottom < 0:
-            self.bottom = 0
-        elif self.top > SCREEN_HEIGHT - 1:
-            self.top = SCREEN_HEIGHT - 1
 
 
 class MyGame(arcade.Window):
 
+    def __init__(self):
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
-    def __init__(self, width, height, title):
+        self.tile_map = None
+        self.scene = None
+        self.physics_engine = None
 
-        super().__init__(width, height, title)
-
-
-        self.player_list = None
-        self.player_sprite = None
-
-        arcade.set_background_color(arcade.color.KHAKI)
+        arcade.set_background_color(arcade.csscolor.KHAKI)
 
     def setup(self):
+        # 1. указание названия файла
+        map_name = "jjj.json"
 
-        self.player_list = arcade.SpriteList()
+        # 2. в этом словаре храним информации о слоях на карте
+        layer_options = {
+            "ground": {
+                "use_spatial_hash": True,
+            },
+        }
 
-        self.player_sprite = Player(f":resources:images/enemies/{x2}", SPRITE_SCALING)
-        self.player_sprite.center_x = 500
-        self.player_sprite.center_y = 500
-        self.player_list.append(self.player_sprite)
+        # 3. Загружаем объект карты
+        self.tile_map = arcade.load_tilemap(map_name, TILE_SCALING, layer_options)
+
+        self.scene = arcade.Scene.from_tilemap(self.tile_map)
+
+        # 4. Спрайт для персонажа возьмем стандартный
+        image_source = x2
+        self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
+        self.player_sprite.center_x = 200
+        self.player_sprite.center_y = 200
+        self.scene.add_sprite("Player", self.player_sprite)
+
+        # 5. Закрасим задний фон карты
+        if self.tile_map.tiled_map.background_color:
+            arcade.set_background_color(self.tile_map.tiled_map.background_color)
+
+        # 6. Создаем 'physics engine', здесь (!!!) появляются объекты спрайтов слоя ground
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            self.player_sprite, self.scene.get_sprite_list("ground"), GRAVITY
+        )
+        
+    def on_key_press(self, key, modifiers):
+
+        if key == arcade.key.LEFT:
+            self.player_sprite.change_x = -MOVEMENT_SPEED
+        elif key == arcade.key.RIGHT:
+            self.player_sprite.change_x = MOVEMENT_SPEED
+
+    def on_key_release(self, key, modifiers):
+        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.player_sprite.change_x = 0
+
 
     def on_draw(self):
 
-
         arcade.start_render()
 
-        self.player_list.draw()
+        self.scene.draw()
 
     def on_update(self, delta_time):
-        self.player_list.update()
-
-    def voice():
-            r = sr.Recognizer()
-            with mic as source:
-                print('Слушаю...')
-                audio = r.listen(source)
-                    
-                    
-                query = r.recognize_google(audio,language = 'ru-RU')
-                print(f'вы сказали:{query.lower()}')
-                f = open('txt.txt','w')
-                f.write(query.lower())
-                f.close()
-                key = query.lower()
-    
-
-
-    def on_key_press(self, key, modifiers):
-        # while True:
-            r = sr.Recognizer()
-            with mic as source:
-                print('Слушаю...')
-                audio = r.listen(source)
-                    
-                    
-                query = r.recognize_google(audio,language = 'ru-RU')
-                print(f'вы сказали:{query.lower()}')
-                f = open('txt.txt','w')
-                f.write(query.lower())
-                f.close()
-                key = query.lower()
-                if key == 'вверх':
-                    self.player_sprite.change_y = MOVEMENT_SPEED
-                    self.player_sprite.change_x = 0
-
-                elif key == 'вниз':
-                    self.player_sprite.change_y = -MOVEMENT_SPEED
-                    self.player_sprite.change_x = 0
-
-                elif key == 'слева':
-                    self.player_sprite.change_x = -MOVEMENT_SPEED
-                    self.player_sprite.change_y = 0
-
-                elif key == 'справа':
-                    self.player_sprite.change_x = MOVEMENT_SPEED
-                    self.player_sprite.change_y = 0
-                elif key == 'стоп':
-                    self.player_sprite.change_y = 0
-                    self.player_sprite.change_x = 0
-    def on_key_release(self, key, modifiers):
-        if key == 'вверх' or key == 'вниз':
-            self.player_sprite.change_y = 0
-        elif key == 'слева' or key == 'справа':
-            self.player_sprite.change_x = 0
-        elif key == 'стоп':
-            self.player_sprite.change_y = 0
-            self.player_sprite.change_x = 0
+        self.physics_engine.update()
 
 
 def main():
-    window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    window = MyGame()
     window.setup()
     arcade.run()
 
 
 if __name__ == "__main__":
     main()
-
-
-
 
 
 
