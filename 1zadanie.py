@@ -7,18 +7,21 @@ import random
 # Constants
 SPRITE_SCALING = 0.5
 
-SCREEN_WIDTH = 510
-SCREEN_HEIGHT = 550
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 1000
 SCREEN_TITLE = "game"
 
 MOVEMENT_SPEED = 5
 
 TILE_SCALING = 0.5
-GRAVITY = 1.0
+GRAVITY = 5
 CHARACTER_SCALING = 0.5
-
-x = ['1_vagoni.jpg','2_vagoni.jpg','3_vagoni.jpg']
+ANGLE_SPEED = 3
+x = ['1_vagoni.jpg']
+# ,'2_vagoni.jpg','3_vagoni.jpg'
 x2 = (random.choice(x))
+
+
 
 
 class MyGame(arcade.Window):
@@ -30,7 +33,7 @@ class MyGame(arcade.Window):
         self.scene = None
         self.physics_engine = None
 
-        arcade.set_background_color(arcade.csscolor.KHAKI)
+        arcade.set_background_color(arcade.csscolor.DARK_KHAKI)
 
     def setup(self):
         # 1. указание названия файла
@@ -65,17 +68,26 @@ class MyGame(arcade.Window):
         )
         
     def on_key_press(self, key, modifiers):
-
-        if key == arcade.key.LEFT:
+        # Вперёд назад
+        if key == arcade.key.DOWN:
             self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.RIGHT:
+        elif key == arcade.key.UP:
             self.player_sprite.change_x = MOVEMENT_SPEED
+        # Градусы
+        elif key == arcade.key.LEFT:
+            self.player_sprite.change_angle = ANGLE_SPEED
+        elif key == arcade.key.RIGHT:
+            self.player_sprite.change_angle = -ANGLE_SPEED
 
     def on_key_release(self, key, modifiers):
-        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
+        if key == arcade.key.UP or key == arcade.key.DOWN:
             self.player_sprite.change_x = 0
+        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
+            self.player_sprite.change_angle = 0
 
 
+
+ 
     def on_draw(self):
 
         arcade.start_render()
@@ -94,6 +106,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
 
 
 
