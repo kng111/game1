@@ -4,6 +4,7 @@ Platformer Game
 import arcade
 from pathlib import Path
 import random
+
 # Constants
 SPRITE_SCALING = 0.5
 
@@ -22,6 +23,19 @@ x = ['1_vagoni.jpg']
 x2 = (random.choice(x))
 
 
+class Wagon(arcade.Sprite):
+    def __init__(self, image_name, scale, x, y):
+        super().__init(image_name, scale)
+
+        self.center_x = x
+        self.center_y = y
+        self.theta = 1
+
+    def move(self):
+        self.center_x += MOVEMENT_SPEED
+
+    def rotate(self):
+        self.turn_right(self.theta)
 
 
 class MyGame(arcade.Window):
@@ -32,7 +46,7 @@ class MyGame(arcade.Window):
         self.tile_map = None
         self.scene = None
         self.physics_engine = None
-
+        self.is_moving = False
         arcade.set_background_color(arcade.csscolor.DARK_KHAKI)
 
     def setup(self):
@@ -53,9 +67,7 @@ class MyGame(arcade.Window):
 
         # 4. Спрайт для персонажа возьмем стандартный
         image_source = x2
-        self.player_sprite = arcade.Sprite(image_source, CHARACTER_SCALING)
-        self.player_sprite.center_x = 200
-        self.player_sprite.center_y = 200
+        self.player_sprite = Wagon(image_source, CHARACTER_SCALING, 200, 200)
         self.scene.add_sprite("Player", self.player_sprite)
 
         # 5. Закрасим задний фон карты
@@ -66,36 +78,26 @@ class MyGame(arcade.Window):
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, self.scene.get_sprite_list("ground"), GRAVITY
         )
-        
+
     def on_key_press(self, key, modifiers):
         # Вперёд назад
-        if key == arcade.key.DOWN:
-            self.player_sprite.change_x = -MOVEMENT_SPEED
-        elif key == arcade.key.UP:
-            self.player_sprite.change_x = MOVEMENT_SPEED
-        # Градусы
-        elif key == arcade.key.LEFT:
-            self.player_sprite.change_angle = ANGLE_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player_sprite.change_angle = -ANGLE_SPEED
+        if key == arcade.key.RIGHT:
+            self.is_moving = True
 
     def on_key_release(self, key, modifiers):
-        if key == arcade.key.UP or key == arcade.key.DOWN:
-            self.player_sprite.change_x = 0
-        elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.player_sprite.change_angle = 0
+        if key == arcade.key.RIGHT:
+            self.is_moving = False
 
-
-
- 
     def on_draw(self):
-
         arcade.start_render()
-
         self.scene.draw()
 
-    def on_update(self, delta_time):
+    def update(self):
         self.physics_engine.update()
+        if self.is_moving:
+            self.player_sprite.move()
+            self.player_sprite.rotate()
+        self.player_sprite.update()
 
 
 def main():
@@ -106,9 +108,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
