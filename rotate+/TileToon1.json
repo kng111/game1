@@ -1,0 +1,14 @@
+{ "columns":24,
+ "image":"..\/TileToon1.png",
+ "imageheight":489,
+ "imagewidth":793,
+ "margin":0,
+ "name":"TileToon1",
+ "spacing":1,
+ "tilecount":336,
+ "tiledversion":"1.7.2",
+ "tileheight":32,
+ "tilewidth":32,
+ "type":"tileset",
+ "version":"1.6"
+}

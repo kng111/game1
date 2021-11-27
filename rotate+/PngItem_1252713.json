@@ -1,0 +1,14 @@
+{ "columns":29,
+ "image":"..\/..\/Downloads\/PngItem_1252713.png",
+ "imageheight":816,
+ "imagewidth":952,
+ "margin":0,
+ "name":"PngItem_1252713",
+ "spacing":0,
+ "tilecount":725,
+ "tiledversion":"1.7.2",
+ "tileheight":32,
+ "tilewidth":32,
+ "type":"tileset",
+ "version":"1.6"
+}
